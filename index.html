@@ -304,11 +304,9 @@ html,body{
 #debug-panel{
   display:none;
   flex-direction:column;
-  gap:4px;
+  gap:6px;
   padding:8px;
   border-top:1px solid var(--border);
-  max-height:160px;
-  overflow-y:auto;
   background:rgba(0,0,0,.4);
   flex-shrink:0;
 }
@@ -319,14 +317,72 @@ html,body{
   color:var(--accent);
   letter-spacing:.1em;
   text-transform:uppercase;
-  margin-bottom:2px;
+}
+#debug-status-box{
+  background:rgba(0,0,0,.5);
+  border:1px solid rgba(78,201,110,.2);
+  border-radius:5px;
+  padding:8px;
+}
+#debug-status-box .dsb-header{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:6px;
+}
+#debug-status-box .dsb-label{
+  font-family:var(--mono);
+  font-size:10px;
+  color:var(--accent);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  flex:1;
+}
+#debug-status-box .dsb-label.stale{color:var(--dim)}
+.dbtn{
+  font-family:var(--mono);
+  font-size:10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  color:var(--text);
+  border-radius:4px;
+  padding:2px 8px;
+  cursor:pointer;
+}
+.dbtn:hover{background:rgba(78,201,110,.15);border-color:rgba(78,201,110,.3);color:var(--accent)}
+#debug-status-raw{
+  font-family:var(--mono);
+  font-size:11px;
+  color:rgba(255,255,255,.75);
+  word-break:break-all;
+  white-space:pre-wrap;
+  line-height:1.7;
+  max-height:200px;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(78,201,110,.2) transparent;
+}
+#debug-status-raw .line-entry{
+  display:block;
+  padding:2px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+}
+#debug-status-raw .line-entry:last-child{border-bottom:none}
+#debug-divider{
+  border:none;
+  border-top:1px solid var(--border);
+  margin:2px 0;
 }
 #debug-log{
   font-family:var(--mono);
   font-size:10px;
-  color:rgba(255,255,255,.5);
+  color:rgba(255,255,255,.4);
   word-break:break-all;
   line-height:1.6;
+  max-height:100px;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(78,201,110,.2) transparent;
 }
 
 /* ── STATUS BAR ────────────────────────────── */
@@ -406,8 +462,17 @@ html,body{
 
   <!-- DEBUG PANEL -->
   <div id="debug-panel">
-    <h4>⚡ Raw Data Interceptor — paste key names to devs</h4>
-    <div id="debug-log">Waiting for game data…</div>
+    <h4>⚡ Debug — stand on a field then check below</h4>
+    <div id="debug-status-box">
+      <div class="dsb-header">
+        <span class="dsb-label stale" id="dsb-label">status key — waiting…</span>
+        <button class="dbtn" id="btn-copy-status">Copy raw</button>
+        <button class="dbtn" id="btn-copy-lines">Copy lines[]</button>
+      </div>
+      <div id="debug-status-raw">Step on a field in-game to see the raw status value here.</div>
+    </div>
+    <hr id="debug-divider">
+    <div id="debug-log"></div>
   </div>
 
   <!-- STATUS BAR -->
@@ -709,20 +774,63 @@ function onGameData(data){
 }
 
 // ─── DEBUG INTERCEPTOR ────────────────────────────────────────────────────
-const debugLog = document.getElementById('debug-log');
-const loggedKeys = new Set();
+const debugLog     = document.getElementById('debug-log');
+const debugRaw     = document.getElementById('debug-status-raw');
+const dsbLabel     = document.getElementById('dsb-label');
+const loggedKeys   = new Set();
+let lastStatusRaw  = '';
 
 function logDebug(data){
   const panel = document.getElementById('debug-panel');
+
+  // ── Always update status box if key present ──
+  if(data.status !== undefined){
+    lastStatusRaw = String(data.status);
+    dsbLabel.textContent = 'status — LIVE ✓';
+    dsbLabel.classList.remove('stale');
+    dsbLabel.classList.add('');
+
+    // Try to parse and pretty-print
+    debugRaw.innerHTML = '';
+    try{
+      const parsed = JSON.parse(lastStatusRaw);
+      if(parsed.lines && Array.isArray(parsed.lines)){
+        // Show each line entry clearly
+        parsed.lines.forEach((l,i) => {
+          const span = document.createElement('span');
+          span.className = 'line-entry';
+          // Strip GTA color codes for display
+          const clean = l.replace(/~[a-zA-Z*]~/g,'');
+          span.textContent = `[${i}] ${clean}`;
+          // Highlight non-empty meaningful lines
+          if(clean.trim()) span.style.color = 'rgba(255,255,255,.85)';
+          debugRaw.appendChild(span);
+        });
+        // Also show full pretty JSON below
+        const pre = document.createElement('span');
+        pre.className = 'line-entry';
+        pre.style.color = 'rgba(255,255,255,.3)';
+        pre.style.marginTop = '6px';
+        pre.style.display = 'block';
+        pre.textContent = '── raw JSON ──\n' + JSON.stringify(parsed, null, 2);
+        debugRaw.appendChild(pre);
+      } else {
+        debugRaw.textContent = JSON.stringify(parsed, null, 2);
+      }
+    } catch(e){
+      debugRaw.textContent = lastStatusRaw;
+    }
+  }
+
   if(!panel.classList.contains('open')) return;
 
-  const newKeys = Object.keys(data).filter(k => !loggedKeys.has(k));
+  // ── Log all new keys (other than status) ──
+  const newKeys = Object.keys(data).filter(k => k !== 'status' && !loggedKeys.has(k));
   newKeys.forEach(k => {
     loggedKeys.add(k);
     const line = document.createElement('div');
-    const v = String(data[k]).substring(0,80);
+    const v = String(data[k]).substring(0,120);
     line.textContent = `${k} = ${v}`;
-    // Highlight potential farming keys
     if(/farm|field|crop|seed|grow|harvest|plant/i.test(k)){
       line.style.color = '#4ec96e';
       line.style.fontWeight = 'bold';
@@ -730,13 +838,32 @@ function logDebug(data){
     debugLog.appendChild(line);
     debugLog.scrollTop = debugLog.scrollHeight;
   });
-
-  if(newKeys.length > 0){
-    document.getElementById('debug-log').firstChild &&
-      (document.getElementById('debug-log').firstChild.textContent === 'Waiting for game data…') &&
-      debugLog.removeChild(debugLog.firstChild);
-  }
 }
+
+// Copy buttons
+document.getElementById('btn-copy-status').addEventListener('click', ()=>{
+  if(!lastStatusRaw){ sendCommand({type:'notification', text:'⚠ No status data yet'}); return; }
+  navigator.clipboard.writeText(lastStatusRaw).then(()=>{
+    sendCommand({type:'notification', text:'📋 Raw status copied to clipboard'});
+  }).catch(()=>{
+    // Fallback: show in notification truncated
+    sendCommand({type:'notification', text: lastStatusRaw.substring(0,100)});
+  });
+});
+
+document.getElementById('btn-copy-lines').addEventListener('click', ()=>{
+  if(!lastStatusRaw){ sendCommand({type:'notification', text:'⚠ No status data yet'}); return; }
+  try{
+    const parsed = JSON.parse(lastStatusRaw);
+    const lines  = parsed.lines || [];
+    const clean  = lines.map(l => l.replace(/~[a-zA-Z*]~/g,'')).join('\n');
+    navigator.clipboard.writeText(clean).then(()=>{
+      sendCommand({type:'notification', text:'📋 Lines[] copied to clipboard'});
+    });
+  } catch(e){
+    sendCommand({type:'notification', text:'⚠ Could not parse lines[]'});
+  }
+});
 
 // ─── AUTO REFRESH ─────────────────────────────────────────────────────────
 function startAuto(ms){
