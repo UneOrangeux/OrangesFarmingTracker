@@ -148,7 +148,7 @@ body{margin:0;background:transparent;pointer-events:none;font-family:var(--sans)
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.9</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.11</span>
   </div>
 </div>
 <script>
@@ -188,15 +188,37 @@ document.getElementById('btn-xp-milestone').addEventListener('click',()=>{
   renderXP();
 });
 
-// STATUS PARSER
-// Harvest = you're on the field with harvester = field IS ready (green circle)
-// Ready   = explicit ready state (may never appear but handle anyway)
-// Growing = timer available in lines
-// Cultivate/Plant/Fertilize = ignore
+// Field name lookup by area (m²) from wiki
+const FIELD_BY_AREA={
+  1907:'Box',2024:'Pressure',2175:'Cable',2419:'Pencil',2744:'Chocolate',
+  3271:'Boom',3393:'Controller',3652:'Coffee',3859:'Tango',3954:'Syringe',
+  3997:'Screw',6688:'Chips',6750:'Wire',6911:'Sport',7095:'Arizona',
+  7163:'Liquid',7313:'Mug',8227:'Taco',10481:'Mach',10916:'Tornado',
+  10973:'Pokemon',11182:'Temp',15766:'Pipe',32022:'Lamp',41077:'Socket'
+};
+
+function fieldNameFromStatus(lines,titleRaw){
+  // Try to extract area from lines e.g. "Total area 10481m²"
+  for(const l of lines){
+    const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Total area\s+([\d]+)\s*m/i);
+    if(m){
+      const area=parseInt(m[1]);
+      if(FIELD_BY_AREA[area]) return FIELD_BY_AREA[area];
+      // Area not in table — use closest match
+      const keys=Object.keys(FIELD_BY_AREA).map(Number);
+      const closest=keys.reduce((a,b)=>Math.abs(b-area)<Math.abs(a-area)?b:a);
+      if(Math.abs(closest-area)<100) return FIELD_BY_AREA[closest];
+      return 'Field '+area+'m²';
+    }
+  }
+  // Fallback: strip color codes from title
+  const clean=titleRaw.replace(/~[a-zA-Z*]~/g,'').trim();
+  return clean||'Unknown';
+}
 function parseStatus(raw){
   let p;try{p=JSON.parse(raw)}catch(e){return}
   const lines=p.lines||[];
-  const fieldName=(p.title||'').replace(/~[a-zA-Z*]~/g,'').trim()||'Unknown';
+  const fieldName=fieldNameFromStatus(lines, p.title||'');
   const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
   const sm=s0.match(/Status:\s*(\w+)/i);
   const status=sm?sm[1].toLowerCase():'';
@@ -213,8 +235,10 @@ function parseStatus(raw){
     let growSecs=growSecs_fallback;
     lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
     fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing'};
+    return;
   }
-  // Cultivate/Plant/Fertilize — nothing to track yet
+  // Cultivate/Plant = field was just harvested or being prepped → remove from cache
+  if(fieldCache[fieldName]) delete fieldCache[fieldName];
 }
 
 function getRem(f){if(f.status==='ready')return 0;return Math.max(0,f.remainingSecs-(Date.now()-f.seenAt)/1000)}
