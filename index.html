@@ -13,7 +13,7 @@
   --text:#d4e8d4;--mono:'Share Tech Mono',monospace;--sans:'Rajdhani',sans-serif;
 }
 html,body{height:100%}
-body{margin:0;background:transparent;pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
+body{margin:0;pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
 #hud{
   position:fixed;top:24px;left:24px;width:420px;
   background:var(--panel);border:1px solid var(--border);border-radius:10px;
@@ -104,6 +104,7 @@ body{margin:0;background:transparent;pointer-events:none;font-family:var(--sans)
   <div id="toolbar">
     <button class="tbtn" id="btn-refresh">↺ Refresh</button>
     <button class="tbtn" id="btn-layout">⊞ Grid</button>
+    <button class="tbtn" id="btn-clear" title="Clear all tracked fields">🗑 Clear</button>
     <select id="refresh-select">
       <option value="0">Auto: Off</option>
       <option value="1000" selected>Auto: 1s</option>
@@ -148,7 +149,7 @@ body{margin:0;background:transparent;pointer-events:none;font-family:var(--sans)
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.11</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.13</span>
   </div>
 </div>
 <script>
@@ -368,6 +369,11 @@ window.addEventListener('message',e=>{
   window.addEventListener('mouseup',()=>drag=false);
 })();
 
+document.getElementById('btn-clear').addEventListener('click',()=>{
+  Object.keys(fieldCache).forEach(k=>delete fieldCache[k]);
+  render();
+  sendCommand({type:'notification',text:'🗑 Field cache cleared'});
+});
 document.getElementById('btn-refresh').addEventListener('click',requestData);
 document.getElementById('btn-layout').addEventListener('click',()=>{
   isGrid=!isGrid;
