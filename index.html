@@ -15,12 +15,14 @@
 html,body{height:100%}
 body{margin:0;pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
 #hud{
-  position:fixed;top:24px;left:24px;width:420px;
+  position:fixed;bottom:16px;right:16px;
+  width:380px;
   background:var(--panel);border:1px solid var(--border);border-radius:10px;
   overflow:hidden;backdrop-filter:blur(14px);
   box-shadow:0 8px 32px rgba(0,0,0,.6),0 0 0 1px rgba(78,201,110,.06);
-  pointer-events:auto;resize:both;min-width:300px;min-height:120px;
-  display:flex;flex-direction:column;font-size:13px;
+  pointer-events:auto;resize:both;min-width:280px;
+  display:inline-flex;flex-direction:column;font-size:13px;
+  max-height:90vh;
 }
 #titlebar{
   display:flex;align-items:center;gap:8px;background:rgba(10,13,18,.92);
@@ -149,7 +151,7 @@ body{margin:0;pointer-events:none;font-family:var(--sans);color:var(--text);over
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.13</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.15</span>
   </div>
 </div>
 <script>
@@ -219,15 +221,19 @@ function fieldNameFromStatus(lines,titleRaw){
 function parseStatus(raw){
   let p;try{p=JSON.parse(raw)}catch(e){return}
   const lines=p.lines||[];
+  // Ignore empty status responses
+  if(!lines.length) return;
   const fieldName=fieldNameFromStatus(lines, p.title||'');
   const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
   const sm=s0.match(/Status:\s*(\w+)/i);
   const status=sm?sm[1].toLowerCase():'';
+  if(!status) return;
   let seed='unknown';
   lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)seed=m[1].toLowerCase()});
   const growSecs_fallback=SEED_TIMES[seed]||0;
   if(status==='harvest'||status==='ready'){
-    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready'};
+    const existing=fieldCache[fieldName]||{};
+    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready',fertilized:existing.fertilized||false};
     return;
   }
   if(status==='growing'){
@@ -235,11 +241,19 @@ function parseStatus(raw){
     lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remSecs=parseFloat(m[1])*60});
     let growSecs=growSecs_fallback;
     lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
-    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing'};
+    const existing=fieldCache[fieldName]||{};
+    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing',fertilized:existing.fertilized||false};
     return;
   }
-  // Cultivate/Plant = field was just harvested or being prepped → remove from cache
-  if(fieldCache[fieldName]) delete fieldCache[fieldName];
+  if(status==='fertilize'){
+    // Mark field as fertilized — will show FERT badge when Growing
+    if(fieldCache[fieldName]) fieldCache[fieldName].fertilized=true;
+    else fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'fertilizing',fertilized:true};
+    return;
+  }
+  // Cultivate/Plant/Fertilize — only remove if we have area info (confirmed field identity)
+  const hasArea=lines.some(l=>/Total area/i.test(l));
+  if(hasArea && fieldCache[fieldName]) delete fieldCache[fieldName];
 }
 
 function getRem(f){if(f.status==='ready')return 0;return Math.max(0,f.remainingSecs-(Date.now()-f.seenAt)/1000)}
@@ -262,10 +276,11 @@ function render(){
     card.className='field-card state-'+state;
     card.dataset.id=f.name;
     const seedLabel=f.seed.charAt(0).toUpperCase()+f.seed.slice(1);
+    const fertBadge=f.fertilized?'<span style="font-size:10px;background:rgba(232,160,32,.15);border:1px solid rgba(232,160,32,.3);color:#e8a020;border-radius:3px;padding:1px 5px;font-family:var(--mono)">⚗ FERT</span>':'';
     if(isGrid){
-      card.innerHTML=`<span class="state-dot"></span><div class="fn">${emoji(f.seed)} ${f.name}</div><div class="seed">${seedLabel}</div><div class="timer">${fmtTime(rem)}</div><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
+      card.innerHTML=`<span class="state-dot"></span><div class="fn">${emoji(f.seed)} ${f.name}</div><div class="seed">${seedLabel}</div>${fertBadge}<div class="timer">${fmtTime(rem)}</div><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
     }else{
-      card.innerHTML=`<span class="state-dot"></span><span class="fn">${emoji(f.seed)} ${f.name}</span><span class="seed">${seedLabel}</span><span class="timer">${fmtTime(rem)}</span><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
+      card.innerHTML=`<span class="state-dot"></span><span class="fn">${emoji(f.seed)} ${f.name}</span><span class="seed">${seedLabel}</span>${fertBadge}<span class="timer">${fmtTime(rem)}</span><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
     }
     card.addEventListener('click',()=>{
       sendCommand({type:'notification',text:'🌾 '+f.name+' — '+seedLabel+' — '+fmtTime(rem)});
@@ -364,8 +379,15 @@ window.addEventListener('message',e=>{
 (function(){
   const hud=document.getElementById('hud'),bar=document.getElementById('titlebar');
   let drag=false,sx=0,sy=0,ox=0,oy=0;
-  bar.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;sy=e.clientY;const r=hud.getBoundingClientRect();ox=r.left;oy=r.top;e.preventDefault()});
-  window.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px';hud.style.right='auto';hud.style.bottom='auto'});
+  bar.addEventListener('mousedown',e=>{
+    drag=true;sx=e.clientX;sy=e.clientY;
+    const r=hud.getBoundingClientRect();ox=r.left;oy=r.top;
+    // Switch to top/left positioning for dragging
+    hud.style.left=ox+'px';hud.style.top=oy+'px';
+    hud.style.right='auto';hud.style.bottom='auto';
+    e.preventDefault();
+  });
+  window.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px'});
   window.addEventListener('mouseup',()=>drag=false);
 })();
 
