@@ -148,7 +148,7 @@ body{margin:0;background:transparent;pointer-events:none;font-family:var(--sans)
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.8</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.9</span>
   </div>
 </div>
 <script>
@@ -188,7 +188,11 @@ document.getElementById('btn-xp-milestone').addEventListener('click',()=>{
   renderXP();
 });
 
-// STATUS PARSER — only caches Growing/Ready fields
+// STATUS PARSER
+// Harvest = you're on the field with harvester = field IS ready (green circle)
+// Ready   = explicit ready state (may never appear but handle anyway)
+// Growing = timer available in lines
+// Cultivate/Plant/Fertilize = ignore
 function parseStatus(raw){
   let p;try{p=JSON.parse(raw)}catch(e){return}
   const lines=p.lines||[];
@@ -196,16 +200,21 @@ function parseStatus(raw){
   const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
   const sm=s0.match(/Status:\s*(\w+)/i);
   const status=sm?sm[1].toLowerCase():'';
-  if(status!=='growing'&&status!=='ready')return;
   let seed='unknown';
   lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)seed=m[1].toLowerCase()});
-  let remSecs=0;
-  if(status==='growing'){
-    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remSecs=parseFloat(m[1])*60});
+  const growSecs_fallback=SEED_TIMES[seed]||0;
+  if(status==='harvest'||status==='ready'){
+    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready'};
+    return;
   }
-  let growSecs=SEED_TIMES[seed]||0;
-  lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
-  fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status};
+  if(status==='growing'){
+    let remSecs=0;
+    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remSecs=parseFloat(m[1])*60});
+    let growSecs=growSecs_fallback;
+    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
+    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing'};
+  }
+  // Cultivate/Plant/Fertilize — nothing to track yet
 }
 
 function getRem(f){if(f.status==='ready')return 0;return Math.max(0,f.remainingSecs-(Date.now()-f.seenAt)/1000)}
