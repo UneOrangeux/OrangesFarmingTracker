@@ -24,7 +24,7 @@
 
 html,body{
   height:100%;
-  background:transparent;
+  background:rgba(0,0,0,0) !important;
   pointer-events:none;
   font-family:var(--sans);
   color:var(--text);
@@ -783,30 +783,24 @@ let lastStatusRaw  = '';
 function logDebug(data){
   const panel = document.getElementById('debug-panel');
 
-  // ── Always update status box if key present ──
+  // ── Always update status box if key present (panel open or not) ──
   if(data.status !== undefined){
     lastStatusRaw = String(data.status);
-    dsbLabel.textContent = 'status — LIVE ✓';
-    dsbLabel.classList.remove('stale');
-    dsbLabel.classList.add('');
+    dsbLabel.textContent = 'STATUS KEY — LIVE ✓';
+    dsbLabel.style.color = 'var(--accent)';
 
-    // Try to parse and pretty-print
     debugRaw.innerHTML = '';
     try{
       const parsed = JSON.parse(lastStatusRaw);
       if(parsed.lines && Array.isArray(parsed.lines)){
-        // Show each line entry clearly
         parsed.lines.forEach((l,i) => {
           const span = document.createElement('span');
           span.className = 'line-entry';
-          // Strip GTA color codes for display
           const clean = l.replace(/~[a-zA-Z*]~/g,'');
           span.textContent = `[${i}] ${clean}`;
-          // Highlight non-empty meaningful lines
           if(clean.trim()) span.style.color = 'rgba(255,255,255,.85)';
           debugRaw.appendChild(span);
         });
-        // Also show full pretty JSON below
         const pre = document.createElement('span');
         pre.className = 'line-entry';
         pre.style.color = 'rgba(255,255,255,.3)';
@@ -822,12 +816,11 @@ function logDebug(data){
     }
   }
 
-  if(!panel.classList.contains('open')) return;
-
-  // ── Log all new keys (other than status) ──
+  // ── Log all keys to bottom log (always, not just when panel open) ──
   const newKeys = Object.keys(data).filter(k => k !== 'status' && !loggedKeys.has(k));
   newKeys.forEach(k => {
     loggedKeys.add(k);
+    if(!panel.classList.contains('open')) return;
     const line = document.createElement('div');
     const v = String(data[k]).substring(0,120);
     line.textContent = `${k} = ${v}`;
@@ -928,9 +921,30 @@ document.getElementById('btn-debug').addEventListener('click', ()=>{
 });
 
 // ─── MESSAGE LISTENER (FiveM → app) ──────────────────────────────────────
+// FiveM sends data in two possible formats:
+// Format A (batch): { key1: val1, key2: val2, ... }
+// Format B (single): { type: "data", key: "status", value: "..." }
 window.addEventListener('message', e => {
   if(!e.data || typeof e.data !== 'object') return;
-  onGameData(e.data);
+  const d = e.data;
+
+  // Format B — single key/value pair
+  if(d.type === 'data' && d.key !== undefined && d.value !== undefined){
+    const obj = {};
+    obj[d.key] = d.value;
+    onGameData(obj);
+    return;
+  }
+
+  // Format C — some servers send {type:"data", ...rest of keys}
+  if(d.type === 'data'){
+    const obj = Object.assign({}, d);
+    delete obj.type;
+    if(Object.keys(obj).length > 0){ onGameData(obj); return; }
+  }
+
+  // Format A — batch object (no type field, or type isn't 'data')
+  onGameData(d);
 });
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
