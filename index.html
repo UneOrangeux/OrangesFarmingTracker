@@ -22,9 +22,10 @@
   --sans:     'Rajdhani', sans-serif;
 }
 
-html,body{
-  height:100%;
-  background:rgba(0,0,0,0) !important;
+html,body{height:100%}
+body{
+  margin:0;
+  background:transparent;
   pointer-events:none;
   font-family:var(--sans);
   color:var(--text);
@@ -479,6 +480,7 @@ html,body{
   <div id="statusbar">
     <span id="status-txt">Waiting for data…</span>
     <span class="last-update" id="last-update">—</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v5</span>
   </div>
 
 </div>
@@ -753,7 +755,9 @@ function onGameData(data){
   Object.assign(gameData, data);
 
   // Update job pill
-  if(data.job_name) document.getElementById('job-pill').textContent = data.job_name;
+  if(data.job_name) document.getElementById('job-pill').textContent = '👷 ' + data.job_name;
+  else if(data.job) document.getElementById('job-pill').textContent = '👷 ' + data.job;
+  if(data.vehicleName) document.getElementById('job-pill').title = data.vehicleName;
   if(data.tabbed !== undefined){
     document.getElementById('tab-pill').style.opacity = data.tabbed ? '1' : '0.35';
   }
@@ -921,30 +925,31 @@ document.getElementById('btn-debug').addEventListener('click', ()=>{
 });
 
 // ─── MESSAGE LISTENER (FiveM → app) ──────────────────────────────────────
-// FiveM sends data in two possible formats:
-// Format A (batch): { key1: val1, key2: val2, ... }
-// Format B (single): { type: "data", key: "status", value: "..." }
+// The game sends: { type:"data", fromTycoonScript:true, data: { key: val, ... } }
+// All actual game keys are nested inside e.data.data
 window.addEventListener('message', e => {
   if(!e.data || typeof e.data !== 'object') return;
-  const d = e.data;
+  const msg = e.data;
 
-  // Format B — single key/value pair
-  if(d.type === 'data' && d.key !== undefined && d.value !== undefined){
-    const obj = {};
-    obj[d.key] = d.value;
-    onGameData(obj);
+  // Unwrap nested data object (confirmed format from debug log)
+  if(msg.type === 'data' && msg.data && typeof msg.data === 'object'){
+    onGameData(msg.data);
     return;
   }
 
-  // Format C — some servers send {type:"data", ...rest of keys}
-  if(d.type === 'data'){
-    const obj = Object.assign({}, d);
-    delete obj.type;
-    if(Object.keys(obj).length > 0){ onGameData(obj); return; }
+  // Fallback: flat object with no type wrapper
+  if(!msg.type){
+    onGameData(msg);
+    return;
   }
 
-  // Format A — batch object (no type field, or type isn't 'data')
-  onGameData(d);
+  // Fallback: type=data but keys are flat on msg itself
+  if(msg.type === 'data'){
+    const obj = Object.assign({}, msg);
+    delete obj.type;
+    delete obj.fromTycoonScript;
+    if(Object.keys(obj).length > 0) onGameData(obj);
+  }
 });
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
