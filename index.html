@@ -151,7 +151,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.21</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.22</span>
   </div>
 </div>
 <script>
@@ -227,17 +227,20 @@ function parseStatus(raw){
   lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)seed=m[1].toLowerCase()});
   const growSecs_fallback=SEED_TIMES[seed]||0;
 
-  // Find existing cached entry — if we have a confirmed name use it, otherwise use detected
-  // This prevents "Farmer" from overwriting a previously identified field name
+  // Find existing cached entry
   let existing=null;
   if(detectedName){
     existing=fieldCache[detectedName]||null;
   } else {
-    // No area in status — try to find the only tracked field as a best guess
     const cached=Object.values(fieldCache);
-    if(cached.length===1) existing=cached[0];
+    // Try to match by seed first
+    const bySeed=cached.filter(f=>f.seed===seed);
+    if(bySeed.length===1) existing=bySeed[0];
+    else if(cached.length===1) existing=cached[0];
   }
-  const fieldName=detectedName||(existing&&existing.name)||'Unknown';
+  // Never create an "Unknown" entry if we can't identify — skip silently
+  const fieldName=detectedName||(existing&&existing.name)||null;
+  if(!fieldName) return;
 
   if(status==='harvest'||status==='ready'){
     fieldCache[fieldName]={...(existing||{}),name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready',fertilized:(existing&&existing.fertilized)||false};
