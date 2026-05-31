@@ -13,7 +13,11 @@
   --text:#d4e8d4;--mono:'Share Tech Mono',monospace;--sans:'Rajdhani',sans-serif;
 }
 html,body{height:100%}
-body{margin:0;pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
+body{
+  margin:0;pointer-events:none;
+  font-family:var(--sans);color:var(--text);overflow:hidden;
+  background:radial-gradient(ellipse at center, rgba(20,28,20,0.45) 0%, rgba(8,10,8,0.72) 100%);
+}
 #hud{
   position:fixed;bottom:16px;right:16px;
   width:380px;
@@ -50,7 +54,7 @@ body{margin:0;pointer-events:none;font-family:var(--sans);color:var(--text);over
 .sumcell .val{display:block;font-family:var(--mono);font-size:16px;color:var(--text);line-height:1.2}
 .sumcell .val.green{color:var(--accent)}
 .sumcell .val.yellow{color:var(--accent2)}
-#field-container{flex:1;overflow-y:auto;padding:8px;scrollbar-width:thin;scrollbar-color:rgba(78,201,110,.2) transparent}
+#field-container{overflow-y:auto;padding:8px;scrollbar-width:thin;scrollbar-color:rgba(78,201,110,.2) transparent;min-height:0}
 #field-container.list .field-card{display:flex;align-items:center;gap:10px;padding:7px 10px;margin-bottom:4px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.025);cursor:pointer;transition:background .12s,border-color .12s;position:relative;overflow:hidden}
 #field-container.list .field-card:hover{background:rgba(78,201,110,.07);border-color:rgba(78,201,110,.3)}
 #field-container.list .field-card .fn{font-weight:700;font-size:13px;min-width:72px;text-transform:uppercase;letter-spacing:.04em}
@@ -201,29 +205,24 @@ const FIELD_BY_AREA={
 };
 
 function fieldNameFromStatus(lines,titleRaw){
-  // Try to extract area from lines e.g. "Total area 10481m²"
   for(const l of lines){
     const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Total area\s+([\d]+)\s*m/i);
     if(m){
       const area=parseInt(m[1]);
       if(FIELD_BY_AREA[area]) return FIELD_BY_AREA[area];
-      // Area not in table — use closest match
       const keys=Object.keys(FIELD_BY_AREA).map(Number);
       const closest=keys.reduce((a,b)=>Math.abs(b-area)<Math.abs(a-area)?b:a);
       if(Math.abs(closest-area)<100) return FIELD_BY_AREA[closest];
       return 'Field '+area+'m²';
     }
   }
-  // Fallback: strip color codes from title
-  const clean=titleRaw.replace(/~[a-zA-Z*]~/g,'').trim();
-  return clean||'Unknown';
+  return null; // No area found — caller should use existing cache name
 }
 function parseStatus(raw){
   let p;try{p=JSON.parse(raw)}catch(e){return}
   const lines=p.lines||[];
-  // Ignore empty status responses
   if(!lines.length) return;
-  const fieldName=fieldNameFromStatus(lines, p.title||'');
+  const detectedName=fieldNameFromStatus(lines, p.title||'');
   const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
   const sm=s0.match(/Status:\s*(\w+)/i);
   const status=sm?sm[1].toLowerCase():'';
@@ -231,9 +230,21 @@ function parseStatus(raw){
   let seed='unknown';
   lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)seed=m[1].toLowerCase()});
   const growSecs_fallback=SEED_TIMES[seed]||0;
+
+  // Find existing cached entry — if we have a confirmed name use it, otherwise use detected
+  // This prevents "Farmer" from overwriting a previously identified field name
+  let existing=null;
+  if(detectedName){
+    existing=fieldCache[detectedName]||null;
+  } else {
+    // No area in status — try to find the only tracked field as a best guess
+    const cached=Object.values(fieldCache);
+    if(cached.length===1) existing=cached[0];
+  }
+  const fieldName=detectedName||(existing&&existing.name)||'Unknown';
+
   if(status==='harvest'||status==='ready'){
-    const existing=fieldCache[fieldName]||{};
-    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready',fertilized:existing.fertilized||false};
+    fieldCache[fieldName]={...(existing||{}),name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready',fertilized:(existing&&existing.fertilized)||false};
     return;
   }
   if(status==='growing'){
@@ -241,19 +252,16 @@ function parseStatus(raw){
     lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remSecs=parseFloat(m[1])*60});
     let growSecs=growSecs_fallback;
     lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
-    const existing=fieldCache[fieldName]||{};
-    fieldCache[fieldName]={name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing',fertilized:existing.fertilized||false};
+    fieldCache[fieldName]={...(existing||{}),name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing',fertilized:(existing&&existing.fertilized)||false};
     return;
   }
   if(status==='fertilize'){
-    // Mark field as fertilized — will show FERT badge when Growing
-    if(fieldCache[fieldName]) fieldCache[fieldName].fertilized=true;
-    else fieldCache[fieldName]={name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'fertilizing',fertilized:true};
+    if(existing) existing.fertilized=true;
+    else if(detectedName) fieldCache[detectedName]={name:detectedName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'fertilizing',fertilized:true};
     return;
   }
-  // Cultivate/Plant/Fertilize — only remove if we have area info (confirmed field identity)
-  const hasArea=lines.some(l=>/Total area/i.test(l));
-  if(hasArea && fieldCache[fieldName]) delete fieldCache[fieldName];
+  // Cultivate/Plant — only remove if we have confirmed area
+  if(detectedName && fieldCache[detectedName]) delete fieldCache[detectedName];
 }
 
 function getRem(f){if(f.status==='ready')return 0;return Math.max(0,f.remainingSecs-(Date.now()-f.seenAt)/1000)}
