@@ -12,12 +12,8 @@
   --accent2:#e8a020;--accent3:#e05555;--dim:rgba(255,255,255,0.35);
   --text:#d4e8d4;--mono:'Share Tech Mono',monospace;--sans:'Rajdhani',sans-serif;
 }
-html,body{height:100%}
-body{
-  margin:0;pointer-events:none;
-  font-family:var(--sans);color:var(--text);overflow:hidden;
-  background:radial-gradient(ellipse at center, rgba(20,28,20,0.45) 0%, rgba(8,10,8,0.72) 100%);
-}
+html,body{margin:0;padding:0}
+body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
 #hud{
   position:fixed;bottom:16px;right:16px;
   width:380px;
@@ -155,7 +151,7 @@ body{
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.15</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.20</span>
   </div>
 </div>
 <script>
