@@ -176,7 +176,10 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
       <button class="tbtn warn" id="btn-api-clear">Clear</button>
     </div>
     <div class="api-setup-row" style="margin-top:6px;align-items:center;gap:8px">
-      <span style="font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap">API refresh</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap">Proxy URL</span>
+      <input type="text" id="proxy-url-input" placeholder="https://tycoon-proxy.your-name.workers.dev" autocomplete="off" spellcheck="false" style="flex:1;font-family:var(--mono);font-size:10px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:5px;padding:4px 8px;outline:none">
+      <button class="tbtn" id="btn-proxy-save">Set</button>
+    </div>
       <select id="api-interval-select" style="font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:5px;padding:4px 6px;flex:1">
         <option value="0">Manual only</option>
         <option value="300000">Every 5m (200 charges/day)</option>
@@ -234,7 +237,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.45</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.46</span>
   </div>
 
 </div>
@@ -242,12 +245,23 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 (function(){
 
 // ── CONSTANTS ─────────────────────────────────────────────────────────────
-const API_BASE   = 'https://tycoon-njyvop.users.cfx.re/status';
-const FIELDS_URL = API_BASE + '/farming/fields.json';
-const CACHE_KEY  = 'farmhud_fields';
-const PENS_KEY   = 'farmhud_pens';
-const APIKEY_KEY='farmhud_apikey';
-const APIINTERVAL_KEY='farmhud_apiinterval';
+// Proxy URL — replace with your Cloudflare Worker URL after deployment
+// e.g. https://tycoon-proxy.YOUR-NAME.workers.dev
+const PROXY_BASE  = 'https://tycoon-proxy.YOUR-NAME.workers.dev/proxy';
+const FIELDS_URL  = PROXY_BASE + '/farming/fields.json';
+const CACHE_KEY      = 'farmhud_fields';
+const PENS_KEY       = 'farmhud_pens';
+const APIKEY_KEY     = 'farmhud_apikey';
+const APIINTERVAL_KEY= 'farmhud_apiinterval';
+const PROXYURL_KEY   = 'farmhud_proxy';
+
+function getFieldsURL(){
+  try{
+    const p=localStorage.getItem(PROXYURL_KEY);
+    if(p) return p.replace(/\/+$/,'')+'/proxy/farming/fields.json';
+  }catch(e){}
+  return PROXY_BASE+'/farming/fields.json';
+}
 
 const SEED_EMOJI = {
   carrots:'🥕',potatoes:'🥔',tomatoes:'🍅',corn:'🌽',wheat:'🌾',strawberries:'🍓',
@@ -293,7 +307,7 @@ async function fetchFieldsFromAPI(){
   if(!apiKey) return;
   try{
     setStatus('Fetching API…', false);
-    const res = await fetch(FIELDS_URL, {headers:{'X-Tycoon-Key': apiKey}});
+    const res = await fetch(getFieldsURL(), {headers:{'X-Tycoon-Key': apiKey}});
     if(res.status===401||res.status===403){
       setApiStatus('❌ Invalid key — check and re-enter.', 'error');
       setStatus('API key error', false);
@@ -620,8 +634,9 @@ function setApiStatus(msg,type){
 function updateApiKeyUI(){
   const input=document.getElementById('api-key-input');
   const sel=document.getElementById('api-interval-select');
-  // Set selector to saved interval
+  const proxyInput=document.getElementById('proxy-url-input');
   if(sel) sel.value=apiInterval;
+  try{const p=localStorage.getItem(PROXYURL_KEY);if(p&&proxyInput)proxyInput.value=p}catch(e){}
   if(apiKey){
     input.value=apiKey;
     input.className='ok';
@@ -722,14 +737,21 @@ function logDebug(data){
 document.getElementById('btn-test-api').addEventListener('click',async()=>{
   const raw=document.getElementById('debug-status-raw');
   if(!apiKey){raw.textContent='No API key saved. Enter one in 🔑 settings.';return}
-  raw.textContent='Testing API fetch…';
+  raw.textContent='Testing API fetch via proxy…\n'+getFieldsURL();
   try{
-    const res=await fetch(FIELDS_URL,{headers:{'X-Tycoon-Key':apiKey}});
+    const res=await fetch(getFieldsURL(),{headers:{'X-Tycoon-Key':apiKey}});
     const text=await res.text();
     raw.textContent='HTTP '+res.status+'\n'+text.substring(0,500);
   }catch(e){
-    raw.textContent='FETCH ERROR: '+e.message+'\n\nThis is likely a CORS block from GitHub Pages.\nThe API fetch may still work when loaded inside FiveM.';
+    raw.textContent='FETCH ERROR: '+e.message+'\n\nMake sure your Cloudflare Worker is deployed\nand the proxy URL is set in 🔑 settings.';
   }
+});
+
+document.getElementById('btn-proxy-save').addEventListener('click',()=>{
+  const val=document.getElementById('proxy-url-input').value.trim();
+  if(!val) return;
+  try{localStorage.setItem(PROXYURL_KEY, val)}catch(e){}
+  setApiStatus('✓ Proxy URL saved — '+val.substring(0,40), 'ok');
 });
 document.getElementById('btn-copy-raw').addEventListener('click',()=>{
   if(!lastStatusRaw){sendCommand({type:'notification',text:'No status yet'});return}
