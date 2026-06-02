@@ -14,28 +14,36 @@
 }
 html,body{height:100%;margin:0;padding:0;background:transparent}
 body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
-
-/* HUD */
-#hud{position:fixed;bottom:16px;right:16px;width:380px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;pointer-events:auto;min-width:280px;display:flex;flex-direction:column;font-size:13px;resize:both;max-height:90vh}
-
-/* TITLEBAR */
+#hud{position:fixed;bottom:16px;right:16px;width:400px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;pointer-events:auto;min-width:280px;display:flex;flex-direction:column;font-size:13px;resize:both;max-height:90vh}
 #titlebar{display:flex;align-items:center;gap:6px;background:rgba(10,13,18,.92);border-bottom:1px solid var(--border);padding:7px 10px;cursor:move;user-select:none;flex-shrink:0}
 .logo{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .spacer{flex:1}
 .pill{font-family:var(--mono);font-size:10px;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:2px 6px;white-space:nowrap}
 .pill.live{color:var(--accent);border-color:rgba(78,201,110,.25);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
-
-/* VIEW TABS */
 .vtab{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:var(--dim);cursor:pointer;transition:all .15s}
 .vtab.active{background:rgba(78,201,110,.15);border-color:rgba(78,201,110,.4);color:var(--accent)}
-
-/* TOOLBAR */
-#toolbar{display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid var(--border);background:rgba(10,13,18,.5);flex-shrink:0}
-.tbtn{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:4px 10px;cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+#toolbar{display:flex;align-items:center;gap:5px;padding:5px 10px;border-bottom:1px solid var(--border);background:rgba(10,13,18,.5);flex-shrink:0}
+.tbtn{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.03em;text-transform:uppercase;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:3px 8px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;white-space:nowrap}
 .tbtn:hover{background:rgba(78,201,110,.12);border-color:rgba(78,201,110,.35);color:var(--accent)}
+.tbtn.warn{border-color:rgba(224,85,85,.3);color:var(--accent3)}
+.tbtn.warn:hover{background:rgba(224,85,85,.1);border-color:var(--accent3)}
 #refresh-select{font-family:var(--mono);font-size:11px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:5px;padding:4px 6px;cursor:pointer}
 #refresh-select:focus{outline:none}
+
+/* API KEY SETUP */
+#api-setup{padding:12px;border-bottom:1px solid var(--border);background:rgba(232,160,32,.06);flex-shrink:0;display:none}
+#api-setup.visible{display:block}
+.api-setup-title{font-family:var(--mono);font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.api-setup-desc{font-size:11px;color:var(--dim);margin-bottom:8px;line-height:1.5}
+.api-setup-row{display:flex;gap:6px}
+#api-key-input{flex:1;font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:5px;padding:5px 8px;outline:none}
+#api-key-input:focus{border-color:var(--accent2)}
+#api-key-input.ok{border-color:var(--accent)}
+#api-key-input.error{border-color:var(--accent3)}
+.api-status{font-family:var(--mono);font-size:10px;margin-top:5px;color:var(--dim)}
+.api-status.ok{color:var(--accent)}
+.api-status.error{color:var(--accent3)}
 
 /* XP BAR */
 #xp-bar{display:flex;align-items:center;gap:8px;padding:5px 10px;border-bottom:1px solid var(--border);background:rgba(10,13,18,.3);flex-shrink:0}
@@ -80,7 +88,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 .state-growing .timer{color:#4a90d9}
 .state-growing .prog-bar{background:#4a90d9}
 
-/* ANIMALS VIEW */
+/* ANIMALS */
 #animals-container{overflow-y:auto;padding:8px;scrollbar-width:thin;scrollbar-color:rgba(78,201,110,.2) transparent;min-height:0;flex:1;display:none}
 #animals-container.active{display:block}
 .pen-card{padding:10px;margin-bottom:6px;border-radius:7px;border:1px solid var(--border);background:rgba(255,255,255,.025);position:relative;overflow:hidden}
@@ -95,14 +103,11 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 .pen-row{display:flex;flex-direction:column;gap:2px}
 .pen-row-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;font-family:var(--mono)}
 .pen-row-val{font-family:var(--mono);font-size:12px;font-weight:600}
-.pen-row-val.ok{color:var(--accent)}
-.pen-row-val.warn{color:var(--accent2)}
-.pen-row-val.danger{color:var(--accent3)}
+.pen-row-val.ok{color:var(--accent)}.pen-row-val.warn{color:var(--accent2)}.pen-row-val.danger{color:var(--accent3)}
 .feed-bar-track{height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:4px}
 .feed-bar-fill{height:100%;border-radius:2px;transition:width .5s}
 .pen-prog{position:absolute;bottom:0;left:0;height:2px;transition:width .5s}
 .animals-empty{padding:28px 16px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--dim)}
-.animals-debug-note{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);padding:8px 10px;border-top:1px solid var(--border);text-align:center}
 
 /* ACTIVE BANNER */
 #active-banner{display:none;align-items:center;gap:8px;padding:5px 10px;border-top:1px solid var(--border);background:rgba(10,13,18,.6);flex-shrink:0;font-family:var(--mono);font-size:11px;margin-top:auto}
@@ -111,7 +116,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 #active-banner .ab-action{color:var(--dim)}
 #active-banner .ab-pct{margin-left:auto;color:var(--dim)}
 
-/* DEBUG PANEL */
+/* DEBUG */
 #debug-panel{display:none;flex-direction:column;gap:6px;padding:8px;border-top:1px solid var(--border);background:rgba(0,0,0,.4);flex-shrink:0}
 #debug-panel.open{display:flex}
 #debug-panel h4{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase}
@@ -126,7 +131,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 #debug-log{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.4);word-break:break-all;line-height:1.6;max-height:80px;overflow-y:auto;scrollbar-width:thin}
 
 /* STATUS BAR */
-#statusbar{display:flex;align-items:center;gap:8px;padding:4px 10px;border-top:1px solid var(--border);background:rgba(10,13,18,.8);flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:auto}
+#statusbar{display:flex;align-items:center;gap:8px;padding:4px 10px;border-top:1px solid var(--border);background:rgba(10,13,18,.8);flex-shrink:0;font-family:var(--mono);font-size:10px;color:var(--dim)}
 #statusbar .last-update{margin-left:auto}
 </style>
 </head>
@@ -155,7 +160,31 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
       <option value="3600000">Auto: 1h</option>
     </select>
     <span style="flex:1"></span>
-    <button class="tbtn" id="btn-debug">🛠</button>
+    <button class="tbtn" id="btn-apikey" title="API Key settings">🔑</button>
+    <button class="tbtn" id="btn-debug" title="Debug panel">🛠</button>
+  </div>
+
+  <!-- API KEY SETUP -->
+  <div id="api-setup">
+    <div class="api-setup-title">🔑 Tycoon API Key</div>
+    <div class="api-setup-desc">Enter your private API key to load all fields automatically.<br>Generate one in-game with <b>/api private new</b>, copy with <b>/api private copy</b>.<br>⚠️ Stored locally on your PC only.</div>
+    <div class="api-setup-row">
+      <input type="password" id="api-key-input" placeholder="Paste your API key here…" autocomplete="off" spellcheck="false">
+      <button class="tbtn" id="btn-api-save">Save</button>
+      <button class="tbtn warn" id="btn-api-clear">Clear</button>
+    </div>
+    <div class="api-setup-row" style="margin-top:6px;align-items:center;gap:8px">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--dim);white-space:nowrap">API refresh</span>
+      <select id="api-interval-select" style="font-family:var(--mono);font-size:11px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:5px;padding:4px 6px;flex:1">
+        <option value="0">Manual only</option>
+        <option value="300000">Every 5m (200 charges/day)</option>
+        <option value="600000" selected>Every 10m (144 charges/day)</option>
+        <option value="1200000">Every 20m (72 charges/day)</option>
+        <option value="1800000">Every 30m (48 charges/day)</option>
+        <option value="3600000">Every 1h (24 charges/day)</option>
+      </select>
+    </div>
+    <div class="api-status" id="api-status">No key saved — using proximity detection only.</div>
   </div>
 
   <div id="xp-bar">
@@ -165,29 +194,19 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
     <button class="dbtn" id="btn-xp-milestone" style="margin-left:4px;padding:2px 6px;font-size:10px">1M</button>
   </div>
 
-  <!-- FIELDS VIEW -->
   <div id="summary">
     <div class="sumcell"><span class="val green" id="sum-ready">0</span>Ready</div>
     <div class="sumcell"><span class="val yellow" id="sum-soon">0</span>&lt; 1h</div>
     <div class="sumcell"><span class="val" id="sum-growing">0</span>Growing</div>
-    <div class="sumcell"><span class="val" id="sum-total">0</span>Tracked</div>
-  </div>
-  <div id="field-container" class="list">
-    <div id="empty-state" style="display:none;flex-direction:column;align-items:center;gap:8px;padding:28px 16px;color:var(--dim);font-size:12px;font-family:var(--mono);text-align:center">
-      <span style="font-size:26px;opacity:.4">🌱</span>
-      <span>Walk onto a growing or ready field<br>to start tracking it here.</span>
-    </div>
+    <div class="sumcell"><span class="val" id="sum-total">0</span>Owned</div>
   </div>
 
-  <!-- ANIMALS VIEW -->
+  <div id="field-container" class="list"></div>
+
   <div id="animals-container">
-    <div class="animals-empty" id="animals-empty">
-      🐄 Walk near an animal pen to start tracking it.<br>
-      <span style="opacity:.5;font-size:10px;margin-top:4px;display:block">Data keys not yet identified — open 🛠 debug near a pen.</span>
-    </div>
+    <div class="animals-empty" id="animals-empty">🐄 Animal pen tracking coming soon.<br><span style="opacity:.5;font-size:10px;display:block;margin-top:4px">Walk near a pen with 🛠 open to capture keys.</span></div>
   </div>
 
-  <!-- ACTIVE BANNER -->
   <div id="active-banner">
     <span class="ab-dot" id="ab-dot"></span>
     <span class="ab-name" id="ab-name"></span>
@@ -195,16 +214,15 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
     <span class="ab-pct" id="ab-pct"></span>
   </div>
 
-  <!-- DEBUG PANEL -->
   <div id="debug-panel">
-    <h4>⚡ Debug — stand on a field or near a pen</h4>
+    <h4>⚡ Debug</h4>
     <div id="debug-status-box">
       <div class="dsb-header">
         <span class="dsb-label" id="dsb-label">STATUS KEY — WAITING…</span>
         <button class="dbtn" id="btn-copy-raw">Copy raw</button>
         <button class="dbtn" id="btn-copy-lines">Copy lines[]</button>
       </div>
-      <div id="debug-status-raw">Step on a field in-game to see data here.</div>
+      <div id="debug-status-raw">Step on a field to see data here.</div>
     </div>
     <hr style="border:none;border-top:1px solid var(--border);margin:2px 0">
     <div id="debug-log"></div>
@@ -213,111 +231,111 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.34</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.40</span>
   </div>
 
 </div>
 <script>
 (function(){
 
-const SEED_TIMES={carrot:900,potato:2700,tomato:3600,corn:5400,wheat:6300,strawberry:7200,pumpkin:10800,apple:14400,orange:18000,grape:21600,peach:25200,cherry:28800,pear:32400,banana:39600,mango:46800,pineapple:54000,watermelon:57600,blueberry:64800,raspberry:72000,blackberry:86400};
-const SEED_EMOJI={carrot:'🥕',potato:'🥔',tomato:'🍅',corn:'🌽',wheat:'🌾',strawberry:'🍓',pumpkin:'🎃',apple:'🍎',orange:'🍊',grape:'🍇',peach:'🍑',cherry:'🍒',pear:'🍐',banana:'🍌',mango:'🥭',pineapple:'🍍',watermelon:'🍉',blueberry:'🫐',raspberry:'🍓',blackberry:'🫐'};
-const PEN_EMOJI={chicken:'🐔',pig:'🐷',cow:'🐄'};
-const FIELD_BY_AREA={1907:'Box',2024:'Pressure',2175:'Cable',2419:'Pencil',2744:'Chocolate',3271:'Boom',3393:'Controller',3652:'Coffee',3859:'Tango',3954:'Syringe',3997:'Screw',6688:'Chips',6750:'Wire',6911:'Sport',7095:'Arizona',7163:'Liquid',7313:'Mug',8227:'Taco',10481:'Mach',10916:'Tornado',10973:'Pokemon',11182:'Temp',15766:'Pipe',32022:'Lamp',41077:'Socket'};
-const ACTION_COLORS={cultivate:'#a0c4ff',plant:'#4ec96e',fertilize:'#e8a020',harvest:'#4ec96e',growing:'#4a90d9',ready:'#4ec96e'};
-const ACTION_LABELS={cultivate:'Cultivating…',plant:'Planting…',fertilize:'Fertilizing…',harvest:'Harvesting — get your tractor!',growing:'Growing',ready:'Ready to Harvest!'};
-const CACHE_KEY='farmhud_fields';
-const PENS_KEY='farmhud_pens';
+// ── CONSTANTS ─────────────────────────────────────────────────────────────
+const API_BASE   = 'https://tycoon-njyvop.users.cfx.re/status';
+const FIELDS_URL = API_BASE + '/farming/fields.json';
+const CACHE_KEY  = 'farmhud_fields';
+const PENS_KEY   = 'farmhud_pens';
+const APIKEY_KEY='farmhud_apikey';
+const APIINTERVAL_KEY='farmhud_apiinterval';
 
-// ── FIELD CACHE ─────────────────────────────────────────────────────────
-const fieldCache=(()=>{
-  try{
-    const saved=localStorage.getItem(CACHE_KEY);
-    if(saved){
-      const parsed=JSON.parse(saved);
-      const now=Date.now();
-      Object.keys(parsed).forEach(k=>{
-        const f=parsed[k];
-        if(f.status==='ready') return;
-        const rem=f.remainingSecs-(now-f.seenAt)/1000;
-        if(rem<-3600) delete parsed[k];
-      });
-      return parsed;
-    }
-  }catch(e){}
-  return {};
+const SEED_EMOJI = {
+  carrots:'🥕',potatoes:'🥔',tomatoes:'🍅',corn:'🌽',wheat:'🌾',strawberries:'🍓',
+  pumpkins:'🎃',apples:'🍎',oranges:'🍊',grapes:'🍇',peaches:'🍑',cherries:'🍒',
+  pears:'🍐',bananas:'🍌',mangoes:'🥭',mangos:'🥭',pineapples:'🍍',watermelons:'🍉',
+  blueberries:'🫐',raspberries:'🍓',blackberries:'🫐',
+  // singular fallbacks
+  carrot:'🥕',potato:'🥔',tomato:'🍅',grape:'🍇',peach:'🍑',cherry:'🍒',
+  pear:'🍐',banana:'🍌',mango:'🥭',pineapple:'🍍',watermelon:'🍉',
+  blueberry:'🫐',raspberry:'🍓',blackberry:'🫐',apple:'🍎',orange:'🍊',
+  strawberry:'🍓',pumpkin:'🎃'
+};
+
+const ACTION_COLORS  = {cultivate:'#a0c4ff',plant:'#4ec96e',fertilize:'#e8a020',harvest:'#4ec96e',growing:'#4a90d9',ready:'#4ec96e'};
+const ACTION_LABELS  = {cultivate:'Cultivating…',plant:'Planting…',fertilize:'Fertilizing…',harvest:'Harvesting!',growing:'Growing',ready:'Ready to Harvest!'};
+const PEN_EMOJI      = {chicken:'🐔',pig:'🐷',cow:'🐄'};
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+// fieldCache: { [name]: { name, crop, harvestTime (unix ms), growTime (ms), fertilized, state, isOwned } }
+// harvestTime = 0 means ready
+const fieldCache = (()=>{
+  try{const s=localStorage.getItem(CACHE_KEY);return s?JSON.parse(s):{}}catch(e){return {}}
 })();
+const penCache = (()=>{
+  try{const s=localStorage.getItem(PENS_KEY);return s?JSON.parse(s):{}}catch(e){return {}}
+})();
+let apiKey=(()=>{try{return localStorage.getItem(APIKEY_KEY)||''}catch(e){return ''}})();
+let apiInterval=(()=>{try{return parseInt(localStorage.getItem(APIINTERVAL_KEY))||600000}catch(e){return 600000}})();
+
+let isGrid=false, autoTimer=null, apiPollTimer=null;
+let lastStatusRaw='', bannerTimeout=null;
+let currentView='fields';
+let xpMilestoneSize=1000000, lastXpRaw=0;
+const notifiedReady=new Set(), notifiedPens=new Set();
 
 function saveFieldCache(){try{localStorage.setItem(CACHE_KEY,JSON.stringify(fieldCache))}catch(e){}}
-
-// ── PEN CACHE ────────────────────────────────────────────────────────────
-// Structure: { [penId]: { id, type, count, feedLevel, feedMax, nextFeedTick, nextCollection, seenAt } }
-// feedLevel/feedMax: ticks remaining
-// nextFeedTick / nextCollection: unix timestamps
-const penCache=(()=>{try{const s=localStorage.getItem(PENS_KEY);return s?JSON.parse(s):{}}catch(e){return {}}})();
 function savePenCache(){try{localStorage.setItem(PENS_KEY,JSON.stringify(penCache))}catch(e){}}
+function saveApiKey(k){try{localStorage.setItem(APIKEY_KEY,k)}catch(e){}}
+function saveApiInterval(v){try{localStorage.setItem(APIINTERVAL_KEY,v)}catch(e){}}
 
-// ── STATE ────────────────────────────────────────────────────────────────
-let isGrid=false,autoTimer=null,lastStatusRaw='',bannerTimeout=null;
-let currentView='fields'; // 'fields' | 'animals'
-let xpMilestoneSize=1000000,lastXpRaw=0;
-
-// Notification dedup — track which fields we've already notified
-const notifiedReady=new Set();
-const notifiedPens=new Set();
-
-// ── NOTIFICATIONS ────────────────────────────────────────────────────────
-function notify(type, msg){
-  if(type==='info')    sendCommand({type:'notification',text:msg});
-  if(type==='oneliner')sendCommand({type:'oneliner',text:msg});
-  if(type==='popup')   sendCommand({type:'popup',title:'🚨 Farm Alert',text:msg});
+// ── API FETCH ─────────────────────────────────────────────────────────────
+async function fetchFieldsFromAPI(){
+  if(!apiKey) return;
+  try{
+    setStatus('Fetching API…', false);
+    const res = await fetch(FIELDS_URL, {headers:{'X-Tycoon-Key': apiKey}});
+    if(res.status===401||res.status===403){
+      setApiStatus('❌ Invalid key — check and re-enter.', 'error');
+      setStatus('API key error', false);
+      return;
+    }
+    if(res.status===402){
+      setApiStatus('❌ No charges left — /api private refill in-game.', 'error');
+      setStatus('No API charges', false);
+      return;
+    }
+    if(!res.ok){setStatus('API error '+res.status, false);return}
+    const data = await res.json();
+    if(!data.fields){setStatus('Unexpected API response', false);return}
+    parseAPIFields(data.fields);
+    setApiStatus('✓ Active — last fetch: '+new Date().toLocaleTimeString(), 'ok');
+    setStatus('API sync OK', true);
+  }catch(e){
+    setStatus('API fetch failed', false);
+  }
 }
 
-function checkFieldNotifications(){
-  Object.values(fieldCache).forEach(f=>{
-    const state=getState(f);
-    if(state==='ready' && !notifiedReady.has(f.name)){
-      notifiedReady.add(f.name);
-      sendCommand({type:'oneliner',text:'🌾 '+f.name+' is ready to harvest!'});
-      sendCommand({type:'sfx',sfx:2});
+function parseAPIFields(fields){
+  // Only process owned fields
+  fields.filter(f=>f.isOwned).forEach(f=>{
+    const name = f.name;
+    const crop = (f.crop_name||'').toLowerCase();
+    const fertilized = !!f.isFertilized;
+    const growTimeMs = (f.growth_time||0)*1000;
+    const harvestTime = f.harvest_time ? f.harvest_time*1000 : 0; // unix ms
+    const state = f.state; // 'growing', 'ready', 'cultivating', 'planting'
+
+    // Only track growing and ready — skip cultivating/planting
+    if(state==='growing'||state==='ready'){
+      fieldCache[name]={name, crop, harvestTime, growTimeMs, fertilized, state, source:'api'};
+    } else {
+      // Field is being worked on — remove from cache if it was there
+      if(fieldCache[name]) delete fieldCache[name];
     }
-    if(state!=='ready') notifiedReady.delete(f.name); // reset so it notifies again next time
   });
+  saveFieldCache();
+  render();
+  checkFieldNotifications();
 }
 
-function checkPenNotifications(){
-  Object.values(penCache).forEach(p=>{
-    const feedPct=p.feedMax>0?p.feedLevel/p.feedMax:1;
-    const key=p.id+'_feed';
-    const keyDanger=p.id+'_danger';
-    const keyCollect=p.id+'_collect';
-
-    // Collection ready
-    if(p.nextCollection && Date.now()>=p.nextCollection && !notifiedPens.has(keyCollect)){
-      notifiedPens.add(keyCollect);
-      notify('info','🐄 '+p.type+' pen — products ready to collect!');
-      sendCommand({type:'sfx',sfx:5});
-    }
-    if(p.nextCollection && Date.now()<p.nextCollection) notifiedPens.delete(keyCollect);
-
-    // Feed low (<30%)
-    if(feedPct<0.3 && feedPct>0.1 && !notifiedPens.has(key)){
-      notifiedPens.add(key);
-      notify('oneliner','⚠️ '+p.type+' pen — feed running low! ('+Math.round(feedPct*100)+'%)');
-    }
-    if(feedPct>=0.3) notifiedPens.delete(key);
-
-    // Feed critical (<10%) — animals at risk
-    if(feedPct<0.1 && !notifiedPens.has(keyDanger)){
-      notifiedPens.add(keyDanger);
-      notify('popup','🚨 '+p.type+' pen STARVING — feed immediately or lose animals!');
-      sendCommand({type:'sfx',sfx:3});
-    }
-    if(feedPct>=0.1) notifiedPens.delete(keyDanger);
-  });
-}
-
-// ── XP ───────────────────────────────────────────────────────────────────
+// ── XP ────────────────────────────────────────────────────────────────────
 function updateXP(raw){lastXpRaw=parseFloat(raw);if(isNaN(lastXpRaw))return;renderXP()}
 function renderXP(){
   const xp=lastXpRaw,ms=xpMilestoneSize;
@@ -333,141 +351,74 @@ document.getElementById('btn-xp-milestone').addEventListener('click',()=>{
   renderXP();
 });
 
-// ── FIELD NAME LOOKUP ────────────────────────────────────────────────────
-function fieldNameFromStatus(lines,titleRaw){
-  for(const l of lines){
-    const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Total area\s+([\d]+)\s*m/i);
-    if(m){
-      const area=parseInt(m[1]);
-      if(FIELD_BY_AREA[area]) return FIELD_BY_AREA[area];
-      const keys=Object.keys(FIELD_BY_AREA).map(Number);
-      const closest=keys.reduce((a,b)=>Math.abs(b-area)<Math.abs(a-area)?b:a);
-      if(Math.abs(closest-area)<100) return FIELD_BY_AREA[closest];
-      return 'Field '+area+'m²';
+// ── HELPERS ───────────────────────────────────────────────────────────────
+function getRem(f){
+  if(f.state==='ready'||f.harvestTime===0) return 0;
+  return Math.max(0, f.harvestTime - Date.now());
+}
+function getState(f){
+  const r=getRem(f);
+  if(r<=0) return 'ready';
+  if(r<3600000) return 'soon';
+  return 'growing';
+}
+function fmtTime(ms){
+  if(ms<=0) return 'READY';
+  const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=s%60;
+  if(h>0) return h+'h '+String(m).padStart(2,'0')+'m';
+  if(m>0) return m+'m '+String(sc).padStart(2,'0')+'s';
+  return sc+'s';
+}
+function cropEmoji(crop){
+  const key=(crop||'').toLowerCase();
+  return SEED_EMOJI[key]||SEED_EMOJI[key.replace(/s$/,'')]||'🌱';
+}
+function capFirst(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s}
+
+// ── NOTIFICATIONS ─────────────────────────────────────────────────────────
+function checkFieldNotifications(){
+  Object.values(fieldCache).forEach(f=>{
+    const state=getState(f);
+    if(state==='ready'&&!notifiedReady.has(f.name)){
+      notifiedReady.add(f.name);
+      sendCommand({type:'oneliner',text:'🌾 '+f.name+' is ready to harvest!'});
+      sendCommand({type:'sfx',sfx:2});
     }
-  }
-  return null;
-}
-
-// ── STATUS PARSER ────────────────────────────────────────────────────────
-function parseStatus(raw){
-  let p;try{p=JSON.parse(raw)}catch(e){return}
-  const lines=p.lines||[];
-  if(!lines.length) return;
-  const detectedName=fieldNameFromStatus(lines,p.title||'');
-  const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
-  const sm=s0.match(/Status:\s*(\w+)/i);
-  const status=sm?sm[1].toLowerCase():'';
-  if(!status) return;
-  let seed='unknown';
-  lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)seed=m[1].toLowerCase()});
-  const growSecs_fallback=SEED_TIMES[seed]||0;
-  let existing=null;
-  if(detectedName) existing=fieldCache[detectedName]||null;
-  else{const cached=Object.values(fieldCache);const bySeed=cached.filter(f=>f.seed===seed);if(bySeed.length===1)existing=bySeed[0];else if(cached.length===1)existing=cached[0];}
-  const fieldName=detectedName||(existing&&existing.name)||(seed!=='unknown'?seed.charAt(0).toUpperCase()+seed.slice(1)+' Field':null);
-  updateActiveBanner(lines,status,fieldName||'Field');
-  if(!fieldName) return;
-  if(status==='harvest'||status==='ready'){
-    fieldCache[fieldName]={...(existing||{}),name:fieldName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'ready',fertilized:(existing&&existing.fertilized)||false};
-    saveFieldCache();return;
-  }
-  if(status==='growing'){
-    let remSecs=0;
-    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remSecs=parseFloat(m[1])*60});
-    let growSecs=growSecs_fallback;
-    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growSecs=parseFloat(m[1])*60});
-    fieldCache[fieldName]={...(existing||{}),name:fieldName,seed,remainingSecs:remSecs,growTimeSecs:growSecs,seenAt:Date.now(),status:'growing',fertilized:(existing&&existing.fertilized)||false};
-    saveFieldCache();return;
-  }
-  if(status==='fertilize'){
-    if(existing) existing.fertilized=true;
-    else if(detectedName) fieldCache[detectedName]={name:detectedName,seed,remainingSecs:0,growTimeSecs:growSecs_fallback,seenAt:Date.now(),status:'fertilizing',fertilized:true};
-    saveFieldCache();return;
-  }
-  if(status==='cultivate'||status==='plant'){
-    const target=detectedName||(existing&&existing.name)||null;
-    if(target&&fieldCache[target]){delete fieldCache[target];saveFieldCache();}
-  }
-}
-
-// ── PEN PARSER ────────────────────────────────────────────────────────────
-// TODO: fill in real key names once identified via debug panel near a pen
-// Expected keys (guesses): pen_chicken_feed, pen_pig_feed, pen_cow_collection, etc.
-// For now we scan all incoming data keys for anything matching pen/animal patterns
-function parsePenData(data){
-  let updated=false;
-  Object.keys(data).forEach(k=>{
-    // Look for keys with animal/pen patterns — adjust once real keys are known
-    const m=k.match(/^(pen|animal|livestock)_?(chicken|pig|cow|poultry|swine|cattle)_?(.+)?$/i);
-    if(!m) return;
-    const type=m[2].toLowerCase();
-    const prop=(m[3]||'').toLowerCase();
-    const id=type; // one pen per animal type for now
-    if(!penCache[id]) penCache[id]={id,type,count:0,feedLevel:0,feedMax:100,nextFeedTick:null,nextCollection:null,seenAt:Date.now()};
-    const val=data[k];
-    if(/feed.*level|feed.*count|food/i.test(prop)) penCache[id].feedLevel=parseFloat(val)||0;
-    if(/feed.*max|max.*feed/i.test(prop)) penCache[id].feedMax=parseFloat(val)||100;
-    if(/count|total|animal/i.test(prop)) penCache[id].count=parseInt(val)||0;
-    if(/next.*feed|feed.*tick/i.test(prop)) penCache[id].nextFeedTick=parseFloat(val)*1000||null;
-    if(/collect|product|ready/i.test(prop)) penCache[id].nextCollection=parseFloat(val)*1000||null;
-    penCache[id].seenAt=Date.now();
-    updated=true;
+    if(state!=='ready') notifiedReady.delete(f.name);
   });
-  if(updated){savePenCache();renderAnimals();}
 }
 
-// ── ACTIVE BANNER ────────────────────────────────────────────────────────
-function updateActiveBanner(lines,status,fieldName){
-  const banner=document.getElementById('active-banner');
-  if(!status){banner.style.display='none';return}
-  const label=ACTION_LABELS[status]||status.charAt(0).toUpperCase()+status.slice(1);
-  const color=ACTION_COLORS[status]||'var(--dim)';
-  let pct='';
-  (lines||[]).forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Percentage complete\s+(\d+)%/i);if(m)pct=m[1]+'%'});
-  document.getElementById('ab-dot').style.background=color;
-  document.getElementById('ab-dot').style.boxShadow='0 0 5px '+color;
-  document.getElementById('ab-name').textContent=fieldName||'Field';
-  document.getElementById('ab-action').textContent=label;
-  document.getElementById('ab-pct').textContent=pct;
-  banner.style.display='flex';
-  clearTimeout(bannerTimeout);
-  bannerTimeout=setTimeout(()=>{document.getElementById('active-banner').style.display='none'},3000);
-}
-
-// ── HELPERS ──────────────────────────────────────────────────────────────
-function getRem(f){if(f.status==='ready')return 0;return Math.max(0,f.remainingSecs-(Date.now()-f.seenAt)/1000)}
-function getState(f){const r=getRem(f);if(r<=0)return'ready';if(r<3600)return'soon';return'growing'}
-function fmtTime(s){if(s<=0)return'READY';const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sc=Math.floor(s%60);if(h>0)return h+'h '+String(m).padStart(2,'0')+'m';if(m>0)return m+'m '+String(sc).padStart(2,'0')+'s';return sc+'s'}
-function fmtTimeMs(ms){return fmtTime(ms/1000)}
-function emoji(s){return SEED_EMOJI[s]||'🌱'}
-
-// ── RENDER FIELDS ────────────────────────────────────────────────────────
+// ── RENDER FIELDS ─────────────────────────────────────────────────────────
 function render(){
   const container=document.getElementById('field-container');
-  const empty=document.getElementById('empty-state');
   container.querySelectorAll('.field-card').forEach(c=>c.remove());
   const list=Object.values(fieldCache);
-  if(!list.length){empty.style.display='flex';container.classList.add('empty');updateSummary([]);return}
-  container.classList.remove('empty');empty.style.display='none';
+
+  if(!list.length){container.classList.add('empty');updateSummary([]);return}
+  container.classList.remove('empty');
+
   list.sort((a,b)=>getRem(a)-getRem(b));
+
   list.forEach(f=>{
-    const rem=getRem(f),state=getState(f);
-    const prog=f.growTimeSecs>0?Math.min(1,(f.growTimeSecs-rem)/f.growTimeSecs):1;
+    const rem=getRem(f), state=getState(f);
+    const prog=f.growTimeMs>0?Math.min(1,(f.growTimeMs-rem)/f.growTimeMs):1;
     const card=document.createElement('div');
-    card.className='field-card state-'+state;card.dataset.id=f.name;
-    const seedLabel=f.seed.charAt(0).toUpperCase()+f.seed.slice(1);
+    card.className='field-card state-'+state;
+    card.dataset.id=f.name;
+    const cropLabel=capFirst(f.crop);
     const fertBadge=f.fertilized?'<span style="font-size:10px;background:rgba(232,160,32,.15);border:1px solid rgba(232,160,32,.3);color:#e8a020;border-radius:3px;padding:1px 5px;font-family:var(--mono)">⚗ FERT</span>':'';
     if(isGrid){
-      card.innerHTML=`<span class="state-dot"></span><div class="fn">${emoji(f.seed)} ${f.name}</div><div class="seed">${seedLabel}</div>${fertBadge}<div class="timer">${fmtTime(rem)}</div><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
+      card.innerHTML=`<span class="state-dot"></span><div class="fn">${cropEmoji(f.crop)} ${f.name}</div><div class="seed">${cropLabel}</div>${fertBadge}<div class="timer">${fmtTime(rem)}</div><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
     }else{
-      card.innerHTML=`<span class="state-dot"></span><span class="fn">${emoji(f.seed)} ${f.name}</span><span class="seed">${seedLabel}</span>${fertBadge}<span class="timer">${fmtTime(rem)}</span><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
+      card.innerHTML=`<span class="state-dot"></span><span class="fn">${cropEmoji(f.crop)} ${f.name}</span><span class="seed">${cropLabel}</span>${fertBadge}<span class="timer">${fmtTime(rem)}</span><div class="prog-bar" style="width:${(prog*100).toFixed(1)}%"></div>`;
     }
-    card.addEventListener('click',()=>{sendCommand({type:'notification',text:'🌾 '+f.name+' — '+seedLabel+' — '+fmtTime(rem)});if(state==='ready')sendCommand({type:'sfx',sfx:2})});
+    card.addEventListener('click',()=>{
+      sendCommand({type:'notification',text:'🌾 '+f.name+' — '+cropLabel+' — '+fmtTime(rem)});
+      if(state==='ready') sendCommand({type:'sfx',sfx:2});
+    });
     container.appendChild(card);
   });
   updateSummary(list);
-  checkFieldNotifications();
 }
 
 function updateSummary(list){
@@ -477,7 +428,128 @@ function updateSummary(list){
   document.getElementById('sum-total').textContent=list.length;
 }
 
-// ── RENDER ANIMALS ────────────────────────────────────────────────────────
+// ── TICK ──────────────────────────────────────────────────────────────────
+function tick(){
+  Object.values(fieldCache).forEach(f=>{
+    const card=document.querySelector('.field-card[data-id="'+f.name+'"]');
+    if(!card) return;
+    const rem=getRem(f), state=getState(f);
+    const prog=f.growTimeMs>0?Math.min(1,(f.growTimeMs-rem)/f.growTimeMs):1;
+    card.className='field-card state-'+state;
+    const t=card.querySelector('.timer'),b=card.querySelector('.prog-bar');
+    if(t) t.textContent=fmtTime(rem);
+    if(b) b.style.width=(prog*100).toFixed(1)+'%';
+  });
+  updateSummary(Object.values(fieldCache));
+  checkFieldNotifications();
+}
+
+// ── ACTIVE BANNER (proximity fallback) ────────────────────────────────────
+let lastBannerStatus='';
+let lastBannerField='';
+
+function updateActiveBanner(lines,status,fieldName){
+  const banner=document.getElementById('active-banner');
+  if(!status){banner.style.display='none';return}
+
+  const label=ACTION_LABELS[status]||capFirst(status);
+  const color=ACTION_COLORS[status]||'var(--dim)';
+  let pct='';
+  (lines||[]).forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Percentage complete\s+(\d+)%/i);if(m)pct=m[1]+'%'});
+
+  document.getElementById('ab-dot').style.background=color;
+  document.getElementById('ab-dot').style.boxShadow='0 0 5px '+color;
+  document.getElementById('ab-name').textContent=fieldName||'Field';
+  document.getElementById('ab-action').textContent=label;
+  document.getElementById('ab-pct').textContent=pct;
+  banner.style.display='flex';
+
+  // Only reset the hide-timer if status or field actually changed
+  const sig=status+'|'+fieldName+'|'+pct;
+  if(sig!==lastBannerStatus){
+    lastBannerStatus=sig;
+    clearTimeout(bannerTimeout);
+    bannerTimeout=setTimeout(()=>{
+      document.getElementById('active-banner').style.display='none';
+      lastBannerStatus='';
+    },3000);
+  }
+}
+
+// ── STATUS PARSER (proximity fallback when no API key) ────────────────────
+function parseStatusFallback(raw){
+  let p;try{p=JSON.parse(raw)}catch(e){return}
+  const lines=p.lines||[];
+  if(!lines.length) return;
+  const s0=(lines[0]||'').replace(/~[a-zA-Z*]~/g,'');
+  const sm=s0.match(/Status:\s*(\w+)/i);
+  const status=sm?sm[1].toLowerCase():'';
+  if(!status) return;
+
+  // Extract area for field identification
+  let area=null;
+  lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Total area\s+([\d]+)\s*m/i);if(m)area=parseInt(m[1])});
+
+  // Find matching field in cache by area or guess
+  let matched=null;
+  if(area){
+    // Try to find field by area match in existing cache
+    matched=Object.values(fieldCache).find(f=>f.area&&Math.abs(f.area-area)<100);
+  }
+  const displayName=matched?matched.name:(area?'Field '+area+'m²':'Field');
+  updateActiveBanner(lines,status,displayName);
+
+  // If API key is set, don't update cache from proximity (API is source of truth)
+  if(apiKey) return;
+
+  // Proximity fallback — update cache without API
+  let crop='unknown';
+  lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Crop:\s*(\w+)/i);if(m)crop=m[1].toLowerCase()});
+  const fieldName=matched?matched.name:(area?'field_'+area:null);
+  if(!fieldName) return;
+
+  if(status==='harvest'||status==='ready'){
+    const existing=fieldCache[fieldName]||{};
+    fieldCache[fieldName]={...existing,name:fieldName,crop,harvestTime:0,growTimeMs:existing.growTimeMs||0,fertilized:existing.fertilized||false,state:'ready',area};
+    saveFieldCache();render();return;
+  }
+  if(status==='growing'){
+    let remMs=0;
+    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Time Remaining:\s*([\d.]+)\s*min/i);if(m)remMs=parseFloat(m[1])*60000});
+    let growMs=0;
+    lines.forEach(l=>{const m=l.replace(/~[a-zA-Z*]~/g,'').match(/Growth Time:\s*([\d.]+)\s*min/i);if(m)growMs=parseFloat(m[1])*60000});
+    const existing=fieldCache[fieldName]||{};
+    fieldCache[fieldName]={...existing,name:fieldName,crop,harvestTime:Date.now()+remMs,growTimeMs:growMs||existing.growTimeMs||0,fertilized:existing.fertilized||false,state:'growing',area};
+    saveFieldCache();render();return;
+  }
+  if(status==='fertilize'){
+    if(fieldCache[fieldName]) fieldCache[fieldName].fertilized=true;
+    saveFieldCache();return;
+  }
+  if(status==='cultivate'||status==='plant'){
+    if(fieldCache[fieldName]){delete fieldCache[fieldName];saveFieldCache();render();}
+  }
+}
+
+// ── ANIMALS ───────────────────────────────────────────────────────────────
+function parsePenData(data){
+  let updated=false;
+  Object.keys(data).forEach(k=>{
+    const m=k.match(/^(pen|animal|livestock)_?(chicken|pig|cow|poultry|swine|cattle)_?(.+)?$/i);
+    if(!m) return;
+    const type=m[2].toLowerCase(),prop=(m[3]||'').toLowerCase(),id=type;
+    if(!penCache[id]) penCache[id]={id,type,count:0,feedLevel:0,feedMax:100,nextFeedTick:null,nextCollection:null,seenAt:Date.now()};
+    const val=data[k];
+    if(/feed.*level|food/i.test(prop)) penCache[id].feedLevel=parseFloat(val)||0;
+    if(/feed.*max/i.test(prop)) penCache[id].feedMax=parseFloat(val)||100;
+    if(/count|total/i.test(prop)) penCache[id].count=parseInt(val)||0;
+    if(/next.*feed/i.test(prop)) penCache[id].nextFeedTick=parseFloat(val)*1000||null;
+    if(/collect|product/i.test(prop)) penCache[id].nextCollection=parseFloat(val)*1000||null;
+    penCache[id].seenAt=Date.now();updated=true;
+  });
+  if(updated){savePenCache();if(currentView==='animals')renderAnimals();}
+}
+
 function renderAnimals(){
   const container=document.getElementById('animals-container');
   const empty=document.getElementById('animals-empty');
@@ -488,17 +560,16 @@ function renderAnimals(){
   pens.forEach(p=>{
     const feedPct=p.feedMax>0?Math.min(1,p.feedLevel/p.feedMax):0;
     const feedColor=feedPct>0.5?'var(--accent)':feedPct>0.2?'var(--accent2)':'var(--accent3)';
-    const cardClass=feedPct<0.1?'pen-card danger':feedPct<0.3?'pen-card warning':'pen-card';
+    const card=document.createElement('div');
+    card.className=feedPct<0.1?'pen-card danger':feedPct<0.3?'pen-card warning':'pen-card';
     const dotColor=feedPct<0.1?'var(--accent3)':feedPct<0.3?'var(--accent2)':'var(--accent)';
     const now=Date.now();
     const collectRem=p.nextCollection?Math.max(0,p.nextCollection-now):null;
     const feedRem=p.nextFeedTick?Math.max(0,p.nextFeedTick-now):null;
-    const card=document.createElement('div');
-    card.className=cardClass;
     card.innerHTML=`
       <div class="pen-header">
         <span class="pen-icon">${PEN_EMOJI[p.type]||'🐾'}</span>
-        <span class="pen-name">${p.type.charAt(0).toUpperCase()+p.type.slice(1)}</span>
+        <span class="pen-name">${capFirst(p.type)}</span>
         <span class="pen-count">${p.count>0?p.count+' animals':''}</span>
         <span class="pen-status-dot" style="background:${dotColor};box-shadow:0 0 5px ${dotColor}"></span>
       </div>
@@ -509,41 +580,20 @@ function renderAnimals(){
           <div class="feed-bar-track"><div class="feed-bar-fill" style="width:${(feedPct*100).toFixed(1)}%;background:${feedColor}"></div></div>
         </div>
         <div class="pen-row">
-          <span class="pen-row-label">Next feed tick</span>
-          <span class="pen-row-val ${feedRem!==null&&feedRem<3600?'warn':'ok'}">${feedRem!==null?fmtTimeMs(feedRem):'—'}</span>
+          <span class="pen-row-label">Next feed</span>
+          <span class="pen-row-val ${feedRem!==null&&feedRem<3600000?'warn':'ok'}">${feedRem!==null?fmtTime(feedRem):'—'}</span>
         </div>
         <div class="pen-row">
           <span class="pen-row-label">Collection</span>
-          <span class="pen-row-val ${collectRem===0?'ok':collectRem!==null&&collectRem<3600?'warn':''}">${collectRem!==null?(collectRem===0?'READY':fmtTimeMs(collectRem)):'—'}</span>
+          <span class="pen-row-val ${collectRem===0?'ok':collectRem!==null&&collectRem<3600000?'warn':''}">${collectRem!==null?(collectRem===0?'READY':fmtTime(collectRem)):'—'}</span>
         </div>
       </div>
       <div class="pen-prog" style="background:${feedColor};width:${(feedPct*100).toFixed(1)}%"></div>`;
     container.appendChild(card);
   });
-  checkPenNotifications();
 }
 
-// ── TICK ─────────────────────────────────────────────────────────────────
-function tick(){
-  if(currentView==='fields'){
-    Object.values(fieldCache).forEach(f=>{
-      const card=document.querySelector('.field-card[data-id="'+f.name+'"]');
-      if(!card)return;
-      const rem=getRem(f),state=getState(f);
-      const prog=f.growTimeSecs>0?Math.min(1,(f.growTimeSecs-rem)/f.growTimeSecs):1;
-      card.className='field-card state-'+state;
-      const t=card.querySelector('.timer'),b=card.querySelector('.prog-bar');
-      if(t)t.textContent=fmtTime(rem);
-      if(b)b.style.width=(prog*100).toFixed(1)+'%';
-    });
-    updateSummary(Object.values(fieldCache));
-    checkFieldNotifications();
-  } else {
-    renderAnimals();
-  }
-}
-
-// ── VIEW TOGGLE ──────────────────────────────────────────────────────────
+// ── VIEW TOGGLE ───────────────────────────────────────────────────────────
 function setView(v){
   currentView=v;
   const isFields=v==='fields';
@@ -551,12 +601,73 @@ function setView(v){
   document.getElementById('tab-animals').classList.toggle('active',!isFields);
   document.getElementById('summary').style.display=isFields?'flex':'none';
   document.getElementById('field-container').style.display=isFields?'':'none';
-  document.getElementById('animals-container').classList.toggle('active',!isFields);
-  if(!isFields) renderAnimals();
-  else render();
+  const ac=document.getElementById('animals-container');
+  ac.classList.toggle('active',!isFields);
+  if(!isFields) renderAnimals(); else render();
 }
 document.getElementById('tab-fields').addEventListener('click',()=>setView('fields'));
 document.getElementById('tab-animals').addEventListener('click',()=>setView('animals'));
+
+// ── API KEY UI ────────────────────────────────────────────────────────────
+function setApiStatus(msg,type){
+  const el=document.getElementById('api-status');
+  el.textContent=msg;
+  el.className='api-status'+(type?' '+type:'');
+}
+function updateApiKeyUI(){
+  const input=document.getElementById('api-key-input');
+  const sel=document.getElementById('api-interval-select');
+  // Set selector to saved interval
+  if(sel) sel.value=apiInterval;
+  if(apiKey){
+    input.value=apiKey;
+    input.className='ok';
+    const opt=sel?sel.options[sel.selectedIndex]:null;
+    setApiStatus('✓ Key saved — '+(opt?opt.text.split('(')[0].trim():'auto'), 'ok');
+  } else {
+    input.value='';
+    input.className='';
+    setApiStatus('No key saved — using proximity detection only.', '');
+  }
+}
+
+// API interval change
+document.getElementById('api-interval-select').addEventListener('change',e=>{
+  apiInterval=parseInt(e.target.value);
+  saveApiInterval(apiInterval);
+  startApiPolling();
+  const opt=e.target.options[e.target.selectedIndex];
+  setApiStatus(apiKey?'✓ Interval updated — '+opt.text.split('(')[0].trim():'Set interval — save a key to activate.','ok');
+});
+document.getElementById('btn-apikey').addEventListener('click',()=>{
+  const panel=document.getElementById('api-setup');
+  panel.classList.toggle('visible');
+  updateApiKeyUI();
+});
+document.getElementById('btn-api-save').addEventListener('click',()=>{
+  const val=document.getElementById('api-key-input').value.trim();
+  if(!val){setApiStatus('⚠ Enter a key first.','error');return}
+  apiKey=val;saveApiKey(val);
+  document.getElementById('api-key-input').className='ok';
+  setApiStatus('✓ Key saved!','ok');
+  startApiPolling();
+  fetchFieldsFromAPI();
+});
+document.getElementById('btn-api-clear').addEventListener('click',()=>{
+  apiKey='';saveApiKey('');
+  document.getElementById('api-key-input').value='';
+  document.getElementById('api-key-input').className='';
+  setApiStatus('Key cleared.','');
+  stopApiPolling();
+});
+
+// ── API POLLING ───────────────────────────────────────────────────────────
+function startApiPolling(){
+  stopApiPolling();
+  if(!apiKey||!apiInterval) return;
+  apiPollTimer=setInterval(fetchFieldsFromAPI, apiInterval);
+}
+function stopApiPolling(){clearInterval(apiPollTimer);apiPollTimer=null}
 
 // ── GAME COMMUNICATION ────────────────────────────────────────────────────
 function sendCommand(obj){window.top.postMessage(obj,'*')}
@@ -564,15 +675,18 @@ function requestData(){sendCommand({type:'getData'})}
 
 function onGameData(data){
   logDebug(data);
-  if(data.status!==undefined) parseStatus(String(data.status));
+  const rawStatus=data.status!==undefined?String(data.status):null;
+  if(rawStatus!==null && rawStatus!==lastStatusRaw){
+    lastStatusRaw=rawStatus;
+    parseStatusFallback(rawStatus);
+  }
   if(data.exp_farming_farming!==undefined) updateXP(data.exp_farming_farming);
   if(data.job_name) document.getElementById('job-pill').textContent=data.job_name;
   else if(data.job) document.getElementById('job-pill').textContent=data.job;
   parsePenData(data);
   if(currentView==='fields') render();
   document.getElementById('last-update').textContent='Updated '+new Date().toLocaleTimeString();
-  document.getElementById('status-txt').style.color='var(--accent)';
-  document.getElementById('status-txt').textContent='Connected';
+  setStatus('Connected', true);
 }
 
 // ── DEBUG ─────────────────────────────────────────────────────────────────
@@ -580,7 +694,6 @@ const debugLog=document.getElementById('debug-log');
 const debugRaw=document.getElementById('debug-status-raw');
 const dsbLabel=document.getElementById('dsb-label');
 const loggedKeys=new Set();
-
 function logDebug(data){
   if(data.status!==undefined){
     lastStatusRaw=String(data.status);
@@ -597,13 +710,12 @@ function logDebug(data){
   const newKeys=Object.keys(data).filter(k=>k!=='status'&&!loggedKeys.has(k));
   newKeys.forEach(k=>{
     loggedKeys.add(k);
-    if(!document.getElementById('debug-panel').classList.contains('open'))return;
+    if(!document.getElementById('debug-panel').classList.contains('open')) return;
     const d=document.createElement('div');d.textContent=k+' = '+String(data[k]).substring(0,100);
     if(/farm|field|crop|seed|grow|harvest|plant|pen|animal|chicken|pig|cow|feed|collect/i.test(k)){d.style.color='#4ec96e';d.style.fontWeight='bold'}
     debugLog.appendChild(d);debugLog.scrollTop=debugLog.scrollHeight;
   });
 }
-
 document.getElementById('btn-copy-raw').addEventListener('click',()=>{
   if(!lastStatusRaw){sendCommand({type:'notification',text:'No status yet'});return}
   navigator.clipboard.writeText(lastStatusRaw).catch(()=>sendCommand({type:'notification',text:lastStatusRaw.substring(0,100)}));
@@ -615,7 +727,7 @@ document.getElementById('btn-copy-lines').addEventListener('click',()=>{
 
 // ── MESSAGE LISTENER ──────────────────────────────────────────────────────
 window.addEventListener('message',e=>{
-  if(!e.data||typeof e.data!=='object')return;
+  if(!e.data||typeof e.data!=='object') return;
   const msg=e.data;
   if(msg.type==='data'&&msg.data&&typeof msg.data==='object'){onGameData(msg.data);return}
   if(!msg.type){onGameData(msg);return}
@@ -631,13 +743,22 @@ window.addEventListener('message',e=>{
   window.addEventListener('mouseup',()=>drag=false);
 })();
 
+// ── STATUS ────────────────────────────────────────────────────────────────
+function setStatus(msg,ok){
+  const el=document.getElementById('status-txt');
+  el.textContent=msg;el.style.color=ok?'var(--accent)':'var(--dim)';
+}
+
 // ── TOOLBAR ───────────────────────────────────────────────────────────────
 document.getElementById('btn-clear').addEventListener('click',()=>{
   Object.keys(fieldCache).forEach(k=>delete fieldCache[k]);
   saveFieldCache();render();
   sendCommand({type:'notification',text:'🗑 Field cache cleared'});
 });
-document.getElementById('btn-refresh').addEventListener('click',requestData);
+document.getElementById('btn-refresh').addEventListener('click',()=>{
+  requestData();
+  if(apiKey) fetchFieldsFromAPI();
+});
 document.getElementById('btn-layout').addEventListener('click',()=>{
   isGrid=!isGrid;
   document.getElementById('field-container').className=isGrid?'grid':'list';
@@ -646,7 +767,7 @@ document.getElementById('btn-layout').addEventListener('click',()=>{
 });
 document.getElementById('refresh-select').addEventListener('change',e=>{
   clearInterval(autoTimer);const v=parseInt(e.target.value);
-  if(v)autoTimer=setInterval(requestData,v);
+  if(v) autoTimer=setInterval(requestData,v);
   document.getElementById('live-pill').style.display=v?'inline':'none';
 });
 document.getElementById('btn-debug').addEventListener('click',()=>document.getElementById('debug-panel').classList.toggle('open'));
@@ -654,9 +775,14 @@ document.getElementById('btn-debug').addEventListener('click',()=>document.getEl
 // ── INIT ──────────────────────────────────────────────────────────────────
 setInterval(tick,1000);
 autoTimer=setInterval(requestData,1000);
-render();
 requestData();
 sendCommand({type:'pin'});
+render();
+if(apiKey){
+  fetchFieldsFromAPI();
+  startApiPolling();
+  setApiStatus('✓ Key loaded — fetching data…','ok');
+}
 
 })();
 </script>
