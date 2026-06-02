@@ -234,7 +234,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.43</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.45</span>
   </div>
 
 </div>
@@ -731,6 +731,7 @@ document.getElementById('btn-test-api').addEventListener('click',async()=>{
     raw.textContent='FETCH ERROR: '+e.message+'\n\nThis is likely a CORS block from GitHub Pages.\nThe API fetch may still work when loaded inside FiveM.';
   }
 });
+document.getElementById('btn-copy-raw').addEventListener('click',()=>{
   if(!lastStatusRaw){sendCommand({type:'notification',text:'No status yet'});return}
   navigator.clipboard.writeText(lastStatusRaw).catch(()=>sendCommand({type:'notification',text:lastStatusRaw.substring(0,100)}));
 });
@@ -757,6 +758,8 @@ window.addEventListener('message',e=>{
   });
   window.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px'});
   window.addEventListener('mouseup',()=>drag=false);
+  document.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px'});
+  document.addEventListener('mouseup',()=>drag=false);
 })();
 
 // ── STATUS ────────────────────────────────────────────────────────────────
