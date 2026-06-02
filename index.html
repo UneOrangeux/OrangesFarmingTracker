@@ -15,7 +15,7 @@
 html,body{height:100%;margin:0;padding:0;background:transparent}
 body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidden}
 #hud{position:fixed;bottom:16px;right:16px;width:400px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden;pointer-events:auto;min-width:280px;display:flex;flex-direction:column;font-size:13px;resize:both;max-height:90vh}
-#titlebar{display:flex;align-items:center;gap:6px;background:rgba(10,13,18,.92);border-bottom:1px solid var(--border);padding:7px 10px;cursor:move;user-select:none;flex-shrink:0}
+#titlebar{display:flex;align-items:center;gap:6px;background:rgba(10,13,18,.92);border-bottom:1px solid var(--border);padding:7px 10px;user-select:none;flex-shrink:0}
 .logo{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
 .spacer{flex:1}
 .pill{font-family:var(--mono);font-size:10px;color:var(--dim);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;padding:2px 6px;white-space:nowrap}
@@ -139,8 +139,10 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
 <div id="hud">
 
   <div id="titlebar">
-    <span class="logo">🌾 Farm HUD</span>
-    <span class="pill live" id="live-pill">● LIVE</span>
+    <div id="drag-handle" style="display:flex;align-items:center;gap:6px;cursor:move;flex:0 0 auto">
+      <span class="logo">🌾 Farm HUD</span>
+      <span class="pill live" id="live-pill">● LIVE</span>
+    </div>
     <span class="spacer"></span>
     <button class="vtab active" id="tab-fields">Fields</button>
     <button class="vtab" id="tab-animals">Animals 🐄</button>
@@ -232,7 +234,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.42</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.43</span>
   </div>
 
 </div>
@@ -748,10 +750,9 @@ window.addEventListener('message',e=>{
 
 // ── DRAG ──────────────────────────────────────────────────────────────────
 (function(){
-  const hud=document.getElementById('hud'),bar=document.getElementById('titlebar');
+  const hud=document.getElementById('hud'),bar=document.getElementById('drag-handle');
   let drag=false,sx=0,sy=0,ox=0,oy=0;
   bar.addEventListener('mousedown',e=>{
-    if(e.target.closest('button')) return; // don't drag when clicking buttons
     drag=true;sx=e.clientX;sy=e.clientY;const r=hud.getBoundingClientRect();ox=r.left;oy=r.top;hud.style.left=ox+'px';hud.style.top=oy+'px';hud.style.right='auto';hud.style.bottom='auto';e.preventDefault();
   });
   window.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px'});
