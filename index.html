@@ -221,6 +221,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
         <span class="dsb-label" id="dsb-label">STATUS KEY — WAITING…</span>
         <button class="dbtn" id="btn-copy-raw">Copy raw</button>
         <button class="dbtn" id="btn-copy-lines">Copy lines[]</button>
+        <button class="dbtn" id="btn-test-api">Test API</button>
       </div>
       <div id="debug-status-raw">Step on a field to see data here.</div>
     </div>
@@ -231,7 +232,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.40</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.41</span>
   </div>
 
 </div>
@@ -716,7 +717,18 @@ function logDebug(data){
     debugLog.appendChild(d);debugLog.scrollTop=debugLog.scrollHeight;
   });
 }
-document.getElementById('btn-copy-raw').addEventListener('click',()=>{
+document.getElementById('btn-test-api').addEventListener('click',async()=>{
+  const raw=document.getElementById('debug-status-raw');
+  if(!apiKey){raw.textContent='No API key saved. Enter one in 🔑 settings.';return}
+  raw.textContent='Testing API fetch…';
+  try{
+    const res=await fetch(FIELDS_URL,{headers:{'X-Tycoon-Key':apiKey}});
+    const text=await res.text();
+    raw.textContent='HTTP '+res.status+'\n'+text.substring(0,500);
+  }catch(e){
+    raw.textContent='FETCH ERROR: '+e.message+'\n\nThis is likely a CORS block from GitHub Pages.\nThe API fetch may still work when loaded inside FiveM.';
+  }
+});
   if(!lastStatusRaw){sendCommand({type:'notification',text:'No status yet'});return}
   navigator.clipboard.writeText(lastStatusRaw).catch(()=>sendCommand({type:'notification',text:lastStatusRaw.substring(0,100)}));
 });
