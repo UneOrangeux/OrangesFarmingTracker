@@ -232,7 +232,7 @@ body{pointer-events:none;font-family:var(--sans);color:var(--text);overflow:hidd
   <div id="statusbar">
     <span id="status-txt">Waiting for game data…</span>
     <span class="last-update" id="last-update">—</span>
-    <span class="pill" style="margin-left:6px;opacity:.4">v0.41</span>
+    <span class="pill" style="margin-left:6px;opacity:.4">v0.42</span>
   </div>
 
 </div>
@@ -750,7 +750,10 @@ window.addEventListener('message',e=>{
 (function(){
   const hud=document.getElementById('hud'),bar=document.getElementById('titlebar');
   let drag=false,sx=0,sy=0,ox=0,oy=0;
-  bar.addEventListener('mousedown',e=>{drag=true;sx=e.clientX;sy=e.clientY;const r=hud.getBoundingClientRect();ox=r.left;oy=r.top;hud.style.left=ox+'px';hud.style.top=oy+'px';hud.style.right='auto';hud.style.bottom='auto';e.preventDefault()});
+  bar.addEventListener('mousedown',e=>{
+    if(e.target.closest('button')) return; // don't drag when clicking buttons
+    drag=true;sx=e.clientX;sy=e.clientY;const r=hud.getBoundingClientRect();ox=r.left;oy=r.top;hud.style.left=ox+'px';hud.style.top=oy+'px';hud.style.right='auto';hud.style.bottom='auto';e.preventDefault();
+  });
   window.addEventListener('mousemove',e=>{if(!drag)return;hud.style.left=(ox+e.clientX-sx)+'px';hud.style.top=(oy+e.clientY-sy)+'px'});
   window.addEventListener('mouseup',()=>drag=false);
 })();
